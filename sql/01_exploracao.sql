@@ -46,3 +46,9 @@ SELECT count(*) AS linhas,
        count(DISTINCT order_id) AS distintos_order_id,
        count(DISTINCT (order_id, order_item_id)) AS distintos_order_item
 FROM 'data/raw/olist_order_items_dataset.csv';
+
+-- P2: chaves de payments
+SELECT count(*) AS linhas,
+       count(DISTINCT order_id) AS distintos_order_id,
+       count(DISTINCT (order_id, payment_sequential)) AS distintos_order_payment
+FROM 'data/raw/olist_order_payments_dataset.csv';
