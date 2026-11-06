@@ -35,7 +35,14 @@ SELECT 'category_translation',
        count(*)
 FROM 'data/raw/product_category_name_translation.csv';
 
--- P2: order_id é único em orders?
--- select count(*) as linhas, 
---         count(distinct order_id) as distintos
--- from 'data/raw/olist_orders_dataset.csv';
+-- P2: chaves de customers
+SELECT count(*) AS linhas,
+       count(DISTINCT customer_id) AS distintos_customer_id,
+       count(DISTINCT customer_unique_id) AS distintos_unique_id
+FROM 'data/raw/olist_customers_dataset.csv';
+
+-- P2: chaves de order_items
+SELECT count(*) AS linhas,
+       count(DISTINCT order_id) AS distintos_order_id,
+       count(DISTINCT (order_id, order_item_id)) AS distintos_order_item
+FROM 'data/raw/olist_order_items_dataset.csv';
