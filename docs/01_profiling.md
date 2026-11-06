@@ -28,6 +28,9 @@ Queries usadas: `sql/01_exploracao.sql`.
 | order_items | order_id, order_item_id | 112.650 | 112.650 | sim |
 | payments | order_id | 103.886 | 99.440 | **não** |
 | payments | order_id, payment_sequential | 103.886 | 103.886 | sim |
+| order_reviews | review_id | 99.224 | 98.410 | **não** |
+| order_reviews | order_id | 99.224 | 98.673 | **não** |
+| order_reviews | review_id, order_id | 99.224 | 99.224 | sim |
 
 ## 3. Descobertas
 
@@ -65,9 +68,23 @@ Queries usadas: `sql/01_exploracao.sql`.
 - **O que significa:** _(preencher depois de investigar o pedido)_
 - **Impacto no modelo:** _(preencher)_
 
+### Avaliações e pedidos têm relação N:N
+- **O que vi:** `review_id` não é único (98.410 distintos em 99.224 linhas) e `order_id`
+  também não (98.673 distintos). A chave é `(review_id, order_id)`. 768 pedidos nunca
+  foram avaliados.
+- **O que significa:**
+  - Um mesmo `review_id` em vários pedidos é **uma avaliação só**, do mesmo cliente
+    (mesmo `customer_unique_id`, nota, comentário e data), replicada para pedidos feitos
+    juntos.
+  - Um pedido com vários `review_id` são **avaliações diferentes** em datas diferentes,
+    e a nota pode mudar (ex.: 5 e depois 4).
+- **Impacto no modelo:** na fato de pedidos, `review_score` = avaliação **mais recente**
+  (maior `review_answer_timestamp`), por representar a opinião final do cliente. Pedidos
+  sem avaliação ficam com nota nula, não zero.
+
 ## 4. Pendências
 - [ ] Status dos 775 pedidos sem itens
 - [ ] Investigar o pedido sem pagamento
-- [ ] P2: chaves de order_reviews, products, sellers, geolocation
+- [ ] P2: chaves de products, sellers, geolocation
 - [ ] P3: quantas pessoas compraram mais de uma vez
 - [ ] P4 a P8

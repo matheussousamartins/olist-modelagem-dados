@@ -1,54 +1,120 @@
+-- Atalhos para os arquivos
+CREATE VIEW orders               AS SELECT * FROM 'data/raw/olist_orders_dataset.csv';
+CREATE VIEW customers            AS SELECT * FROM 'data/raw/olist_customers_dataset.csv';
+CREATE VIEW order_items          AS SELECT * FROM 'data/raw/olist_order_items_dataset.csv';
+CREATE VIEW payments             AS SELECT * FROM 'data/raw/olist_order_payments_dataset.csv';
+CREATE VIEW reviews              AS SELECT * FROM 'data/raw/olist_order_reviews_dataset.csv';
+CREATE VIEW products             AS SELECT * FROM 'data/raw/olist_products_dataset.csv';
+CREATE VIEW sellers              AS SELECT * FROM 'data/raw/olist_sellers_dataset.csv';
+CREATE VIEW geolocation          AS SELECT * FROM 'data/raw/olist_geolocation_dataset.csv';
+CREATE VIEW category_translation AS SELECT * FROM 'data/raw/product_category_name_translation.csv';
+
 -- P1: quantas linhas tem cada arquivo?
-SELECT 'orders' as tabela, 
-        count(*) as linhas 
-FROM 'data/raw/olist_orders_dataset.csv'
+SELECT 'orders' AS tabela,
+        count(*) AS linhas
+FROM orders
 UNION ALL
-SELECT 'customers', 
-        count(*) 
-FROM 'data/raw/olist_customers_dataset.csv'
+SELECT 'customers',
+        count(*)
+FROM customers
 UNION ALL
 SELECT 'order_items',
         count(*)
-FROM 'data/raw/olist_order_items_dataset.csv'
+FROM order_items
 UNION ALL
 SELECT 'payments',
        count(*)
-FROM 'data/raw/olist_order_payments_dataset.csv'
+FROM payments
 UNION ALL
 SELECT 'order_reviews',
        count(*)
-FROM 'data/raw/olist_order_reviews_dataset.csv'
+FROM reviews
 UNION ALL
 SELECT 'products',
        count(*)
-FROM 'data/raw/olist_products_dataset.csv'
+FROM products
 UNION ALL
 SELECT 'sellers',
        count(*)
-FROM 'data/raw/olist_sellers_dataset.csv'
+FROM sellers
 UNION ALL
 SELECT 'geolocation',
        count(*)
-FROM 'data/raw/olist_geolocation_dataset.csv'
+FROM geolocation
 UNION ALL
 SELECT 'category_translation',
        count(*)
-FROM 'data/raw/product_category_name_translation.csv';
+FROM category_translation;
 
 -- P2: chaves de customers
 SELECT count(*) AS linhas,
        count(DISTINCT customer_id) AS distintos_customer_id,
        count(DISTINCT customer_unique_id) AS distintos_unique_id
-FROM 'data/raw/olist_customers_dataset.csv';
+FROM customers;
 
 -- P2: chaves de order_items
 SELECT count(*) AS linhas,
        count(DISTINCT order_id) AS distintos_order_id,
        count(DISTINCT (order_id, order_item_id)) AS distintos_order_item
-FROM 'data/raw/olist_order_items_dataset.csv';
+FROM order_items;
 
 -- P2: chaves de payments
 SELECT count(*) AS linhas,
        count(DISTINCT order_id) AS distintos_order_id,
        count(DISTINCT (order_id, payment_sequential)) AS distintos_order_payment
-FROM 'data/raw/olist_order_payments_dataset.csv';
+FROM payments;
+
+-- P2: chaves de order_reviews
+SELECT count(*) AS linhas,
+       count(DISTINCT review_id) AS distintos_review_id,
+       count(DISTINCT order_id) AS distintos_order_id,
+       count(DISTINCT (review_id, order_id)) AS distintos_review_order
+FROM reviews;
+
+-- P2b: review_ids que aparecem em mais de uma linha
+SELECT review_id, count(*) AS qtd_linhas
+FROM reviews
+GROUP BY review_id
+HAVING count(*) > 1
+ORDER BY qtd_linhas DESC, review_id
+LIMIT 5;
+
+-- P2c: detalhe dos review_ids repetidos, com o cliente de cada pedido
+WITH repetidos AS (
+    SELECT review_id
+    FROM reviews
+    GROUP BY review_id
+    HAVING count(*) > 1
+    ORDER BY review_id
+    LIMIT 3
+)
+SELECT r.review_id,
+       r.order_id,
+       c.customer_unique_id,
+       r.review_score,
+       r.review_creation_date,
+       left(r.review_comment_message, 40) AS comentario
+FROM reviews r
+JOIN repetidos   USING (review_id)
+JOIN orders o    USING (order_id)
+JOIN customers c USING (customer_id)
+ORDER BY r.review_id, r.order_id;
+
+-- P2d: pedidos com mais de uma avaliação
+WITH varias AS (
+    SELECT order_id
+    FROM reviews
+    GROUP BY order_id
+    HAVING count(*) > 1
+    ORDER BY order_id
+    LIMIT 3
+)
+SELECT r.order_id,
+       r.review_id,
+       r.review_score,
+       r.review_creation_date,
+       r.review_answer_timestamp,
+       left(r.review_comment_message, 40) AS comentario
+FROM reviews r
+JOIN varias USING (order_id)
+ORDER BY r.order_id, r.review_answer_timestamp;
