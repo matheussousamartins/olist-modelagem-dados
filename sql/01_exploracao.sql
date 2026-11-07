@@ -166,3 +166,29 @@ FROM geolocation
 WHERE geolocation_city ILIKE 's%o paulo' OR geolocation_city = 'sp'
 GROUP BY 1
 ORDER BY 2 DESC;
+
+-- P6a: status dos pedidos sem itens
+SELECT o.order_status, count(*) AS pedidos
+FROM orders o
+WHERE NOT EXISTS (
+    SELECT 1 FROM order_items i WHERE i.order_id = o.order_id
+)
+GROUP BY 1
+ORDER BY 2 DESC;
+
+-- P6b: o pedido sem pagamento
+SELECT o.*
+FROM orders o
+WHERE NOT EXISTS (
+    SELECT 1 FROM payments p WHERE p.order_id = o.order_id
+);
+
+-- P6c: o pedido sem pagamento tem itens? E avaliação?
+SELECT * 
+FROM order_items 
+WHERE order_id = 'bfbd0f9bdef84302105ad712db648a6c';
+
+SELECT review_score, 
+       review_comment_message 
+FROM reviews 
+WHERE order_id = 'bfbd0f9bdef84302105ad712db648a6c';

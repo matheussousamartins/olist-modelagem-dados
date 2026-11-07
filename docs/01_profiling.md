@@ -55,8 +55,14 @@ Queries usadas: `sql/01_exploracao.sql`.
 
 ### 775 pedidos sem nenhum item
 - **O que vi:** `orders` tem 99.441 pedidos, mas só 98.666 aparecem em `order_items`.
-- **O que significa:** _(preencher depois de ver o `order_status` desses pedidos)_
-- **Impacto no modelo:** _(preencher)_
+  Status desses pedidos: `unavailable` (603), `canceled` (164), `created` (5),
+  `invoiced` (2) e `shipped` (1).
+- **O que significa:** 767 (99%) são pedidos que não se concretizaram: produto
+  indisponível ou cancelamento. Os 3 restantes (`invoiced` e `shipped` sem itens) são
+  inconsistência de dados.
+- **Impacto no modelo:** os pedidos ficam na `fct_orders` com `items_qty = 0` e valores
+  zerados, para que as taxas de cancelamento e de indisponibilidade possam ser calculadas.
+  Não aparecem na `fct_order_items`, que só tem itens reais.
 
 ### Um pedido pode ter vários pagamentos
 - **O que vi:** 103.886 pagamentos para 99.440 pedidos; a chave é
@@ -67,9 +73,15 @@ Queries usadas: `sql/01_exploracao.sql`.
   na fato de itens sem duplicar ou ratear, então pagamentos ganham uma fato separada.
 
 ### 1 pedido sem pagamento
-- **O que vi:** 99.441 pedidos, mas só 99.440 aparecem em `payments`.
-- **O que significa:** _(preencher depois de investigar o pedido)_
-- **Impacto no modelo:** _(preencher)_
+- **O que vi:** o pedido `bfbd0f9bdef84302105ad712db648a6c` (set/2016) tem 3 itens
+  (R$ 143,46 com frete) e status `delivered`, mas nenhum pagamento. O cliente deu nota 1
+  e escreveu que não recebeu o produto.
+- **O que significa:** o status contradiz a avaliação do cliente, e o pagamento pode não
+  ter sido registrado. É do início da operação (2016), quando os dados eram menos
+  consistentes.
+- **Impacto no modelo:** o pedido é mantido. Na `fct_orders`, `payment_value` fica
+  **nulo** (desconhecido), não zero, para não distorcer o ticket médio. Caso listado nas
+  perguntas ao negócio.
 
 ### Avaliações e pedidos têm relação N:N
 - **O que vi:** `review_id` não é único (98.410 distintos em 99.224 linhas) e `order_id`
@@ -109,7 +121,7 @@ Queries usadas: `sql/01_exploracao.sql`.
   de escolher a grafia mais frequente.
 
 ## 4. Pendências
-- [ ] Status dos 775 pedidos sem itens
-- [ ] Investigar o pedido sem pagamento
 - [ ] P3: quantas pessoas compraram mais de uma vez
-- [ ] P4 a P8
+- [ ] P7: valores de `order_status` e `payment_type`
+- [ ] P8: pedidos `delivered` sem data de entrega
+- [ ] Nulos por coluna nas tabelas principais
