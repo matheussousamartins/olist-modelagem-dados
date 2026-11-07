@@ -71,6 +71,22 @@ SELECT count(*) AS linhas,
        count(DISTINCT (review_id, order_id)) AS distintos_review_order
 FROM reviews;
 
+-- P2: chaves de products
+SELECT count(*) AS linhas,
+       count(DISTINCT product_id) AS distintos_product_id
+FROM products;
+
+-- P2: chaves de sellers
+SELECT count(*) AS linhas,
+       count(DISTINCT seller_id) AS distintos_seller_id
+FROM sellers;
+
+-- P2: chaves de geolocation
+SELECT count(*) AS linhas,
+       count(DISTINCT geolocation_zip_code_prefix) AS distintos_cep,
+       round(count(*) / count(DISTINCT geolocation_zip_code_prefix), 1) AS linhas_por_cep
+FROM geolocation;
+
 -- P2b: review_ids que aparecem em mais de uma linha
 SELECT review_id, count(*) AS qtd_linhas
 FROM reviews
@@ -118,3 +134,35 @@ SELECT r.order_id,
 FROM reviews r
 JOIN varias USING (order_id)
 ORDER BY r.order_id, r.review_answer_timestamp;
+
+-- P2e: como são as linhas de um mesmo CEP?
+SELECT geolocation_city,
+       geolocation_state,
+       count(*) AS linhas,
+       min(geolocation_lat) AS lat_min,
+       max(geolocation_lat) AS lat_max
+FROM geolocation
+WHERE geolocation_zip_code_prefix = '01001'
+GROUP BY ALL;
+
+-- P2f: quantos CEPs têm mais de uma grafia de cidade?
+SELECT count(*) AS ceps_com_varias_grafias
+FROM (
+    SELECT geolocation_zip_code_prefix
+    FROM geolocation
+    GROUP BY geolocation_zip_code_prefix
+    HAVING count(DISTINCT geolocation_city) > 1
+);
+
+-- P2g: quantas coordenadas caem fora do Brasil?
+SELECT count(*) AS pontos_fora_do_brasil
+FROM geolocation
+WHERE NOT (geolocation_lat BETWEEN -33.75 AND 5.27
+       AND geolocation_lng BETWEEN -73.99 AND -34.79);
+
+-- P2h: grafias de São Paulo na geolocalização
+SELECT geolocation_city, count(*) AS linhas
+FROM geolocation
+WHERE geolocation_city ILIKE 's%o paulo' OR geolocation_city = 'sp'
+GROUP BY 1
+ORDER BY 2 DESC;

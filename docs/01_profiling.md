@@ -31,6 +31,9 @@ Queries usadas: `sql/01_exploracao.sql`.
 | order_reviews | review_id | 99.224 | 98.410 | **não** |
 | order_reviews | order_id | 99.224 | 98.673 | **não** |
 | order_reviews | review_id, order_id | 99.224 | 99.224 | sim |
+| products | product_id | 32.951 | 32.951 | sim |
+| sellers | seller_id | 3.095 | 3.095 | sim |
+| geolocation | geolocation_zip_code_prefix | 1.000.163 | 19.015 | **não** |
 
 ## 3. Descobertas
 
@@ -82,9 +85,31 @@ Queries usadas: `sql/01_exploracao.sql`.
   (maior `review_answer_timestamp`), por representar a opinião final do cliente. Pedidos
   sem avaliação ficam com nota nula, não zero.
 
+### Colunas com grafia errada na origem
+- **O que vi:** `products` tem `product_name_lenght` e `product_description_lenght`
+  ("lenght" em vez de "length").
+- **Impacto no modelo:** renomear para `name_length` e `description_length` na camada de
+  staging. A origem não é alterada.
+
+### CEP é texto, não número
+- **O que vi:** os prefixos de CEP têm zeros à esquerda (ex.: `01001`). O DuckDB lê como
+  texto porque o CSV traz os valores entre aspas; pandas e Excel leriam como número e
+  perderiam o zero.
+- **Impacto no modelo:** CEP é sempre `varchar` de 5 caracteres. Nenhum cálculo é feito
+  com CEP, então não há motivo para ser numérico.
+
+### `geolocation` não tem chave e tem dados sujos
+- **O que vi:** 1.000.163 linhas para 19.015 CEPs (~53 pontos por CEP). 8.556 CEPs têm
+  mais de uma grafia de cidade (ex.: `sao paulo`, `são paulo`, `sp` e `sa£o paulo`, este
+  último um erro de codificação). 42 pontos estão fora do território brasileiro.
+- **O que significa:** cada linha é um ponto de coordenada dentro da área de um prefixo de
+  CEP. Os pontos de um mesmo CEP são próximos (ex.: CEP 01001 varia ~200 m).
+- **Impacto no modelo:** `dim_geography` com uma linha por CEP: descartar pontos fora do
+  Brasil, usar a mediana de lat/lng e padronizar a cidade (minúsculas, sem acento) antes
+  de escolher a grafia mais frequente.
+
 ## 4. Pendências
 - [ ] Status dos 775 pedidos sem itens
 - [ ] Investigar o pedido sem pagamento
-- [ ] P2: chaves de products, sellers, geolocation
 - [ ] P3: quantas pessoas compraram mais de uma vez
 - [ ] P4 a P8
