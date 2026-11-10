@@ -120,7 +120,19 @@ Queries usadas: `sql/01_exploracao.sql`.
   Brasil, usar a mediana de lat/lng e padronizar a cidade (minúsculas, sem acento) antes
   de escolher a grafia mais frequente.
 
+### Domínios de `order_status` e `payment_type`
+- **O que vi:** `order_status` tem 8 valores: `delivered` (96.478), `shipped` (1.107),
+  `canceled` (625), `unavailable` (609), `invoiced` (314), `processing` (301),
+  `created` (5) e `approved` (2). `payment_type` tem 4 formas reais (cartão de crédito
+  com ~78% do valor, boleto, voucher, débito) e `not_defined` (3 pagamentos, R$ 0).
+  461 pedidos cancelados têm itens em `order_items`.
+- **O que significa:** os status são etapas de um ciclo de vida; `canceled` e
+  `unavailable` são finais sem venda. `not_defined` é registro sem forma de pagamento.
+- **Impacto no modelo:** receita = pedidos com status diferente de `canceled` e
+  `unavailable` ("receita vendida"). `order_status` entra nas fatos como dimensão
+  degenerada, para permitir o filtro. `not_defined` fica fora das análises por forma de
+  pagamento.
+
 ## 4. Pendências
-- [ ] P7: valores de `order_status` e `payment_type`
 - [ ] P8: pedidos `delivered` sem data de entrega
 - [ ] Nulos por coluna nas tabelas principais

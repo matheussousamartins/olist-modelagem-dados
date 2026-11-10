@@ -1,13 +1,13 @@
 -- Atalhos para os arquivos
-CREATE VIEW orders               AS SELECT * FROM 'data/raw/olist_orders_dataset.csv';
-CREATE VIEW customers            AS SELECT * FROM 'data/raw/olist_customers_dataset.csv';
-CREATE VIEW order_items          AS SELECT * FROM 'data/raw/olist_order_items_dataset.csv';
-CREATE VIEW payments             AS SELECT * FROM 'data/raw/olist_order_payments_dataset.csv';
-CREATE VIEW reviews              AS SELECT * FROM 'data/raw/olist_order_reviews_dataset.csv';
-CREATE VIEW products             AS SELECT * FROM 'data/raw/olist_products_dataset.csv';
-CREATE VIEW sellers              AS SELECT * FROM 'data/raw/olist_sellers_dataset.csv';
-CREATE VIEW geolocation          AS SELECT * FROM 'data/raw/olist_geolocation_dataset.csv';
-CREATE VIEW category_translation AS SELECT * FROM 'data/raw/product_category_name_translation.csv';
+CREATE OR REPLACE VIEW orders               AS SELECT * FROM 'data/raw/olist_orders_dataset.csv';
+CREATE OR REPLACE VIEW customers            AS SELECT * FROM 'data/raw/olist_customers_dataset.csv';
+CREATE OR REPLACE VIEW order_items          AS SELECT * FROM 'data/raw/olist_order_items_dataset.csv';
+CREATE OR REPLACE VIEW payments             AS SELECT * FROM 'data/raw/olist_order_payments_dataset.csv';
+CREATE OR REPLACE VIEW reviews              AS SELECT * FROM 'data/raw/olist_order_reviews_dataset.csv';
+CREATE OR REPLACE VIEW products             AS SELECT * FROM 'data/raw/olist_products_dataset.csv';
+CREATE OR REPLACE VIEW sellers              AS SELECT * FROM 'data/raw/olist_sellers_dataset.csv';
+CREATE OR REPLACE VIEW geolocation          AS SELECT * FROM 'data/raw/olist_geolocation_dataset.csv';
+CREATE OR REPLACE VIEW category_translation AS SELECT * FROM 'data/raw/product_category_name_translation.csv';
 
 -- P1: quantas linhas tem cada arquivo?
 SELECT 'orders' AS tabela,
@@ -202,3 +202,18 @@ FROM (
         GROUP BY customer_unique_id
         HAVING count(*) > 1
 );
+
+-- P7a: valores de order_status
+SELECT order_status, 
+        count(*) AS pedidos
+FROM orders
+GROUP BY order_status
+ORDER BY pedidos DESC;
+
+-- P7b: valores de payment_type
+SELECT payment_type,
+        count(*) AS pagamentos,
+        round(sum(payment_value), 2) AS valor_total
+FROM payments
+GROUP BY payment_type
+ORDER BY pagamentos DESC;
