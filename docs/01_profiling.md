@@ -39,7 +39,7 @@ Queries usadas: `sql/01_exploracao.sql`.
 
 ### `customer_id` não representa a pessoa
 - **O que vi:** `customer_id` tem 99.441 valores distintos, o mesmo número de pedidos.
-  `customer_unique_id` tem 96.096.
+  `customer_unique_id` tem 96.096. Só 2.997 pessoas (3,1%) compraram mais de uma vez.
 - **O que significa:** a Olist gera um `customer_id` novo a cada pedido. A pessoa é o
   `customer_unique_id`.
 - **Impacto no modelo:** a dimensão de cliente deve usar `customer_unique_id`. Usar
@@ -121,7 +121,6 @@ Queries usadas: `sql/01_exploracao.sql`.
   de escolher a grafia mais frequente.
 
 ## 4. Pendências
-- [ ] P3: quantas pessoas compraram mais de uma vez
 - [ ] P7: valores de `order_status` e `payment_type`
 - [ ] P8: pedidos `delivered` sem data de entrega
 - [ ] Nulos por coluna nas tabelas principais

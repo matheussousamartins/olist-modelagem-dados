@@ -192,3 +192,13 @@ SELECT review_score,
        review_comment_message 
 FROM reviews 
 WHERE order_id = 'bfbd0f9bdef84302105ad712db648a6c';
+
+-- P3: quantas pessoas compraram mais de uma vez?
+SELECT count(*) AS pessoas_com_recompra
+FROM (
+        SELECT customer_unique_id,
+                count(*) AS quantidade_pedidos
+        FROM customers
+        GROUP BY customer_unique_id
+        HAVING count(*) > 1
+);
