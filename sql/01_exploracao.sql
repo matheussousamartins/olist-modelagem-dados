@@ -217,3 +217,15 @@ SELECT payment_type,
 FROM payments
 GROUP BY payment_type
 ORDER BY pagamentos DESC;
+
+-- P8: pedidos `delivered` sem data de entrega
+SELECT *
+FROM orders
+WHERE order_status = 'delivered' AND order_delivered_customer_date IS NULL;
+
+-- P8b: pedidos não delivered com data de entrega
+SELECT order_status,
+        count(*) AS nao_delivered_com_data
+FROM orders
+WHERE order_status != 'delivered' AND order_delivered_customer_date IS NOT NULL
+GROUP BY order_status;

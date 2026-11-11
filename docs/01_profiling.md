@@ -133,6 +133,16 @@ Queries usadas: `sql/01_exploracao.sql`.
   degenerada, para permitir o filtro. `not_defined` fica fora das análises por forma de
   pagamento.
 
+### Status e data de entrega nem sempre concordam
+- **O que vi:** 8 pedidos `delivered` não têm `order_delivered_customer_date` (7 foram
+  enviados à transportadora; 1, de mai/2017, nem isso). 6 pedidos `canceled` têm data de
+  entrega ao cliente.
+- **O que significa:** nos 8, a confirmação de entrega provavelmente não foi registrada.
+  Nos 6, o pedido foi cancelado depois de entregue (provável devolução), e o dataset não
+  tem status próprio para isso.
+- **Impacto no modelo:** métricas de prazo (`delivery_days`, `is_late`) só são calculadas
+  para pedidos `delivered` com data de entrega; nos demais ficam nulas. Os dois casos
+  entram nas perguntas ao negócio.
+
 ## 4. Pendências
-- [ ] P8: pedidos `delivered` sem data de entrega
 - [ ] Nulos por coluna nas tabelas principais
