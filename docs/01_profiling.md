@@ -144,5 +144,21 @@ Queries usadas: `sql/01_exploracao.sql`.
   para pedidos `delivered` com data de entrega; nos demais ficam nulas. Os dois casos
   entram nas perguntas ao negócio.
 
-## 4. Pendências
-- [ ] Nulos por coluna nas tabelas principais
+## 4. Nulos
+
+| Tabela | Coluna | Nulos | % | Esperado? |
+| --- | --- | ---: | ---: | --- |
+| orders | order_approved_at | 160 | 0,16 | Sim: pedido ainda não aprovado ou cancelado |
+| orders | order_delivered_carrier_date | 1.783 | 1,79 | Sim: pedido ainda não enviado ou cancelado |
+| orders | order_delivered_customer_date | 2.965 | 2,98 | Sim, exceto 8 pedidos `delivered` (ver P8) |
+| products | category, name_lenght, description_lenght, photos_qty | 610 | 1,85 | Não: os mesmos 610 produtos sem dados de catálogo |
+| products | weight_g, length_cm, height_cm, width_cm | 2 | 0,01 | Não: produtos sem medidas |
+| reviews | review_comment_title | 87.656 | 88,3 | Sim: campo opcional |
+| reviews | review_comment_message | 58.247 | 58,7 | Sim: campo opcional |
+
+`order_items`, `payments`, `customers` e `sellers` não têm nulos.
+
+**Leitura:** os nulos de `orders` crescem ao longo do ciclo de vida (aprovação → envio →
+entrega), porque cada data só é preenchida quando o pedido chega àquela etapa. Na
+`dim_product`, categoria nula vira `'sem_categoria'`, para aparecer como grupo próprio
+nas análises.

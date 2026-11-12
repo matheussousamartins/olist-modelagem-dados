@@ -229,3 +229,40 @@ SELECT order_status,
 FROM orders
 WHERE order_status != 'delivered' AND order_delivered_customer_date IS NOT NULL
 GROUP BY order_status;
+
+-- P9: nulos por coluna
+SELECT column_name, null_percentage
+FROM (SUMMARIZE orders)
+WHERE null_percentage > 0;
+
+-- P9a: nulos em orders
+SELECT column_name, null_percentage
+FROM (SUMMARIZE orders)
+WHERE null_percentage > 0;
+
+-- P9b: nulos em products
+SELECT column_name, null_percentage
+FROM (SUMMARIZE products)
+WHERE null_percentage > 0;
+
+-- P9c: nulos em reviews
+SELECT column_name, null_percentage
+FROM (SUMMARIZE reviews)
+WHERE null_percentage > 0;
+
+-- P9d: nulos em order_items
+SELECT column_name, null_percentage
+FROM (SUMMARIZE order_items)
+WHERE null_percentage > 0;
+
+-- P9e: nulos em payments
+SELECT column_name, null_percentage
+FROM (SUMMARIZE payments)
+WHERE null_percentage > 0;
+
+-- P9f: os produtos sem categoria são os mesmos sem nome e sem fotos?
+SELECT count(*) AS produtos_sem_categoria,
+       count(*) FILTER (WHERE product_name_lenght IS NULL) AS tambem_sem_nome,
+       count(*) FILTER (WHERE product_photos_qty IS NULL) AS tambem_sem_fotos
+FROM products
+WHERE product_category_name IS NULL;
