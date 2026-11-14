@@ -143,6 +143,14 @@ Queries usadas: `sql/01_exploracao.sql`.
 - **Impacto no modelo:** métricas de prazo (`delivery_days`, `is_late`) só são calculadas
   para pedidos `delivered` com data de entrega; nos demais ficam nulas. Os dois casos
   entram nas perguntas ao negócio.
+  
+### 2 categorias sem tradução
+- **O que vi:** `pc_gamer` (3 produtos) e `portateis_cozinha_e_preparadores_de_alimentos`
+  (10 produtos) existem em `products`, mas não em `category_translation`.
+- **O que significa:** a tabela de tradução está incompleta; a relação entre as duas não
+  tem integridade referencial.
+- **Impacto no modelo:** na `dim_product`, `category_name_en` usa a tradução quando
+  existe e, se não existir, o nome em português.
 
 ## 4. Nulos
 

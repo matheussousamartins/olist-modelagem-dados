@@ -266,3 +266,12 @@ SELECT count(*) AS produtos_sem_categoria,
        count(*) FILTER (WHERE product_photos_qty IS NULL) AS tambem_sem_fotos
 FROM products
 WHERE product_category_name IS NULL;
+
+-- P10: categorias de products sem tradução
+SELECT p.product_category_name, 
+        count(*) AS produtos
+FROM products p
+LEFT JOIN category_translation t USING (product_category_name)
+WHERE p.product_category_name IS NOT NULL
+  AND t.product_category_name IS NULL
+GROUP BY 1;
